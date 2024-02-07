@@ -1,0 +1,18 @@
+.btn {
+  height: 45px;
+  width: 180px;
+  background-color: blue;
+  color: white;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 30px;
+  margin: 20px auto;
+  transition: background-color 250ms linear;
+  &:hover,
+  &:focus {
+    background-color: darkblue;
+  }
+}

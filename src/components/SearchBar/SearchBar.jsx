@@ -1,15 +1,23 @@
 import React from "react";
+import style from "./SearchBar.module.css";
 import { IoMdSearch } from "react-icons/io";
 
-export const SearchBar = () => {
+export const SearchBar = ({ searchImages }) => {
   return (
-    <div>
-      <form>
-        <input type="text" placeholder="Search images" />
-        <button type="submit">
-          <IoMdSearch />
+    <header className={style.header}>
+      <form className={style.form} onSubmit={searchImages}>
+        <input
+          className={style.search}
+          autoComplete="off"
+          name="search"
+          autoFocus
+          type="text"
+          placeholder="Search images..."
+        />
+        <button className={style.btn} type="submit">
+          <IoMdSearch className={style.icon} />
         </button>
       </form>
-    </div>
+    </header>
   );
 };
