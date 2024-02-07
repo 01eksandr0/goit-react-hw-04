@@ -2,7 +2,7 @@ import { useRef, useState, forwardRef } from "react";
 import { getImages } from "../js/request";
 import "./App.css";
 import { ImageGallery } from "./ImageGallery/ImageGallery";
-import { SearchBar } from "./searchBar/searchBar";
+import { SearchBar } from "./SearchBar/SearchBar";
 import { LoadMoreBtn } from "./LoadMoreBtn/LoadMoreBtn";
 import { ErrorMessage } from "./ErrorMessage/ErrorMessage";
 import { Loader } from "./Loader/Loader";
