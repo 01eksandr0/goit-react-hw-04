@@ -1,4 +1,4 @@
-import { useRef, useState, forwardRef } from "react";
+import { useRef, useState, forwardRef, useEffect } from "react";
 import { getImages } from "../js/request";
 import "./App.css";
 import { ImageGallery } from "./ImageGallery/ImageGallery";
@@ -10,65 +10,61 @@ import toast, { Toaster } from "react-hot-toast";
 import { ImageModal } from "./ImageModal/ImageModal";
 
 const KEY = "tPyF-JOOf607yCQmy2T4mCANWSyx1bzc-VxDCaqrUmg";
-const searchParams = {
-  query: "",
-  client_id: KEY,
-  page: 1,
-  per_page: 12,
-};
 let modalSrc = "";
 
 export const App = () => {
   const [images, setImages] = useState([]);
-  const [isShowButton, setIsShowButton] = useState(false);
+  const [showBtn, setShowBtn] = useState(false);
   const [isError, setIsError] = useState("");
   const [showLoader, setShowLoader] = useState(false);
   const [modalIsShow, setModalShow] = useState(false);
-  const modalRef = useRef();
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
 
-  const searchImages = async (e) => {
-    setShowLoader(true);
-    e.preventDefault();
-    if (e.target.search.value.trim() !== "") {
-      searchParams.query = e.target.search.value;
-      searchParams.page = 1;
+  useEffect(() => {
+    if (!query) return;
+    const addNewImages = async () => {
+      const searchParams = {
+        query,
+        client_id: KEY,
+        page,
+        per_page: 12,
+      };
       const arrayImages = await getImages(searchParams);
       if (arrayImages.status === 200) {
-        setImages([...arrayImages.data.results]);
-        setIsShowButton(true);
+        setShowBtn(
+          arrayImages.data.total_pages && arrayImages.data.total_pages !== page
+        );
+        if (searchParams.page === 1) {
+          setImages([...arrayImages.data.results]);
+        } else {
+          setImages([...images, ...arrayImages.data.results]);
+        }
         setIsError("");
       } else {
         setIsError(arrayImages.data.errors[0]);
       }
+    };
+    addNewImages();
+    setShowLoader(false);
+  }, [page, query]);
+
+  const getSearchWord = (e) => {
+    setShowLoader(true);
+    e.preventDefault();
+    if (e.target.search.value.trim() !== "") {
+      setQuery(e.target.search.value);
+      setPage(1);
     } else {
       toast.error("Fill in the input field");
     }
-
-    setShowLoader(false);
   };
 
-  const loadMoreImages = async () => {
+  const loadMoreImages = () => {
+    setPage(page + 1);
     setShowLoader(true);
-    searchParams.page += 1;
-    const arrayImages = await getImages(searchParams);
-    setImages([...images, ...arrayImages.data.results]);
+  };
 
-    if (
-      searchParams.page >= parseInt(arrayImages.total / searchParams.per_page)
-    ) {
-      setIsShowButton(false);
-    }
-    setShowLoader(false);
-  };
-  const closeModal = (e) => {
-    if (e.target === e.currentTarget) setModalShow(false);
-  };
-  const closeModalEsc = (e) => {
-    if (e.key === "Escape") {
-      setModalShow(false);
-      removeEventListener("keydown", closeModalEsc);
-    }
-  };
   const openModal = (e) => {
     if (e.target.nodeName === "IMG") {
       modalSrc = e.target.dataset.src;
@@ -78,14 +74,14 @@ export const App = () => {
   };
   return (
     <>
-      <SearchBar searchImages={searchImages} />
+      <SearchBar getSearchWord={getSearchWord} />
       {isError ? (
         <ErrorMessage error={isError} />
       ) : (
         <ImageGallery images={images} openModal={openModal} />
       )}
       {showLoader && <Loader />}
-      {isShowButton && <LoadMoreBtn loadMoreImages={loadMoreImages} />}
+      {showBtn && <LoadMoreBtn loadMoreImages={loadMoreImages} />}
       <Toaster position="top-center" reverseOrder={false} />
       {modalIsShow && <ImageModal value={modalSrc} closeModal={closeModal} />}
     </>
