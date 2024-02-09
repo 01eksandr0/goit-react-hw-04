@@ -30,8 +30,8 @@ export const App = () => {
         page,
         per_page: 12,
       };
-      const arrayImages = await getImages(searchParams);
-      if (arrayImages.status === 200) {
+      try {
+        const arrayImages = await getImages(searchParams);
         setShowBtn(
           arrayImages.data.total_pages && arrayImages.data.total_pages !== page
         );
@@ -41,12 +41,13 @@ export const App = () => {
           setImages([...images, ...arrayImages.data.results]);
         }
         setIsError("");
-      } else {
-        setIsError(arrayImages.data.errors[0]);
+      } catch (error) {
+        setIsError(error);
+      } finally {
+        setShowLoader(false);
       }
     };
     addNewImages();
-    setShowLoader(false);
   }, [page, query]);
 
   const getSearchWord = (e) => {
@@ -63,6 +64,10 @@ export const App = () => {
   const loadMoreImages = () => {
     setPage(page + 1);
     setShowLoader(true);
+  };
+  const closeModal = () => setModalShow(false);
+  const closeModalEsc = (e) => {
+    if (e.key === "Escape") setModalShow(false);
   };
 
   const openModal = (e) => {
