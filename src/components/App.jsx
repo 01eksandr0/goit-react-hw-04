@@ -10,7 +10,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { ImageModal } from "./ImageModal/ImageModal";
 
 const KEY = "tPyF-JOOf607yCQmy2T4mCANWSyx1bzc-VxDCaqrUmg";
-let modalSrc = "";
 
 export const App = () => {
   const [images, setImages] = useState([]);
@@ -20,6 +19,7 @@ export const App = () => {
   const [modalIsShow, setModalShow] = useState(false);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
+  const [modalSrc, setModalSrc] = useState("");
 
   useEffect(() => {
     if (!query) return;
@@ -30,8 +30,8 @@ export const App = () => {
         page,
         per_page: 12,
       };
-      const arrayImages = await getImages(searchParams);
-      if (arrayImages.status === 200) {
+      try {
+        const arrayImages = await getImages(searchParams);
         setShowBtn(
           arrayImages.data.total_pages && arrayImages.data.total_pages !== page
         );
@@ -41,12 +41,13 @@ export const App = () => {
           setImages([...images, ...arrayImages.data.results]);
         }
         setIsError("");
-      } else {
-        setIsError(arrayImages.data.errors[0]);
+      } catch (error) {
+        setIsError(error);
+      } finally {
       }
+      setShowLoader(false);
     };
     addNewImages();
-    setShowLoader(false);
   }, [page, query]);
 
   const getSearchWord = (e) => {
@@ -71,7 +72,7 @@ export const App = () => {
 
   const openModal = (e) => {
     if (e.target.nodeName === "IMG") {
-      modalSrc = e.target.dataset.src;
+      setModalSrc(e.target.dataset.src);
       setModalShow(true);
       addEventListener("keydown", closeModalEsc);
     }
