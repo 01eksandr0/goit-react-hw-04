@@ -44,8 +44,8 @@ export const App = () => {
       } catch (error) {
         setIsError(error);
       } finally {
+        setShowLoader(false);
       }
-      setShowLoader(false);
     };
     addNewImages();
   }, [page, query]);
